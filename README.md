@@ -20,15 +20,15 @@ Add the following dependency to your `project.clj` file:
 (require '[clj-time.core :as time])
 
 ;; generate a key
-(def my-key "FR7u7rt7YI60oSUnD8N+uA==")
+(def my-key (ticket/generate-key))
+=> "FR7u7rt7YI60oSUnD8N+uA=="
+
 
 ;; issue a ticket valid for 2 minutes with value of "123".
 (def my-ticket (ticket/issue my-key 
                              "123" 
                              (time/plus (time/now) (time/minutes 2))))
-
 => "your-encrypted-signed-and-encoded-ticket-string"
-
 
 
 ;; Easily retrieve the string value from a ticket. 
@@ -41,7 +41,7 @@ Add the following dependency to your `project.clj` file:
 
 
 ;; After expiration of ticket, or if the ticket has been tampered with...
-(ticket/get-text key myticket)
+(ticket/get-text my-key my-ticket)
 => nil
 
 
