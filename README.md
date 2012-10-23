@@ -2,7 +2,7 @@
 
 An encrypted ticketing library, primarily intended for use in cookie based authentication.
 
-Each ticket is encrypted with AES 128 bit encryption & initialization vector, then signed with SHA256 HMAC. Ticket expiration is packaged inside of the cookie and is checked when value is retrieved.
+Each ticket is encrypted with AES 128 bit encryption & initialization vector, then signed with SHA256 HMAC. Expiration is packaged inside of the ticket and is checked when value is retrieved.
 
 
 ## Installation
