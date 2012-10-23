@@ -1,8 +1,9 @@
-# ticket
+# Ticket
 
 An encrypted ticketing library, primarily intended for use in cookie based authentication.
 
-Each ticket is encrypted with AES 128 bit encryption & initialization vector, then signed with SHA256 HMAC. Ticket expiration 
+Each ticket is encrypted with AES 128 bit encryption & initialization vector, then signed with SHA256 HMAC. Ticket expiration is packaged inside of the cookie and is checked when value is retrieved.
+
 
 ## Installation
 
@@ -44,13 +45,7 @@ Add the following dependency to your `project.clj` file:
 (ticket/get-text my-key my-ticket)
 => nil
 
-
-
-
 ```
-
-
-
 
 
 
