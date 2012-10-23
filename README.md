@@ -22,7 +22,7 @@ Add the following dependency to your `project.clj` file:
 
 ;; generate a key
 (def my-key (ticket/generate-key))
-=> "FR7u7rt7YI60oSUnD8N+uA=="
+=> "your-randomly-generated-128bit-key-string"
 
 
 ;; issue a ticket valid for 2 minutes with value of "123".
@@ -36,8 +36,8 @@ Add the following dependency to your `project.clj` file:
 (ticket/get-text my-key my-ticket)
 => "123"
 
-;; If the ticket value is an Integer, easily retrieve that as well. 
-(ticket/get-text my-key my-ticket)
+;; If the ticket value is an integer, easily retrieve the numeric value. 
+(ticket/get-id my-key my-ticket)
 => 123
 
 
