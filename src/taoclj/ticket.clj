@@ -115,3 +115,7 @@
   (let [txt (get-text key tkt)]
     (if txt
       (try (Integer. txt) (catch Exception e nil)))))
+
+
+(defn generate-key []
+  (encode (random-bytes 16)))

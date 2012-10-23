@@ -87,3 +87,7 @@
                                    (is (= expected (get-id key tkt))))
        1 111
        0 nil))
+
+
+(deftest keys-are-generated
+  (is (= 24 (count (generate-key)))))
