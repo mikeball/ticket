@@ -72,7 +72,7 @@
            (encode)))))
 
 
-(defn slice [#^bytes bytes start end]
+(defn slice [#^bytes bytes ^Integer start ^Integer end]
   (Arrays/copyOfRange bytes start end))
 
 
