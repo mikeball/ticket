@@ -23,8 +23,8 @@
          (encode (encrypt (decode key) (decode iv) clear-text)))))
 
 (deftest data-is-decrypted
-  (is (= clear-text (String. (decrypt (decode key) 
-                                      (decode iv) 
+  (is (= clear-text (String. (decrypt (decode key)
+                                      (decode iv)
                                       (decode "44TtYtVqMsOGhz/J5uJFZQ=="))))))
 
 (deftest signature-is-generated
@@ -81,12 +81,13 @@
        0 nil))
 
 (deftest get-id-returns-expected-values
-  (are [minutes-offset expected] (let [now (time/now)
+  (are [issued minutes-offset expected] (let [now (time/now)
                                        expires-at  (time/plus now (time/minutes minutes-offset))
-                                       tkt (issue key "111" expires-at)]
+                                       tkt (issue key issued expires-at)]
                                    (is (= expected (get-id key tkt))))
-       1 111
-       0 nil))
+       "111" 1 111
+       "17592186045420" 1 17592186045420
+       "111" 0 nil))
 
 
 (deftest keys-are-generated

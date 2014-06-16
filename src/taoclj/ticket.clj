@@ -12,7 +12,7 @@
 
 (defn random-bytes
   "Generates a cryptographically random byte array of given size."
-  [size] 
+  [size]
   (let [bytes (byte-array size)] (.nextBytes (SecureRandom.) bytes) bytes))
 
 
@@ -21,8 +21,6 @@
 
 (defn decode [^String encoded]
   (Base64/decodeBase64 (.getBytes encoded)))
-
-
 
 (defn- init-cipher [^Integer op-mode #^bytes key #^bytes iv]
   (let [cipher (Cipher/getInstance "AES/CBC/PKCS5Padding")]
@@ -40,7 +38,7 @@
 (defn decrypt
   "returns byte array of decrypted data"
   [#^bytes key #^bytes iv #^bytes cipher-text]
-  (.doFinal (init-cipher Cipher/DECRYPT_MODE key iv) 
+  (.doFinal (init-cipher Cipher/DECRYPT_MODE key iv)
             cipher-text))
 
 
@@ -57,7 +55,7 @@
 (defn signature-valid?
   "Checks validity/equality of HmacSHA256 signatures in constant time."
   [#^bytes good #^bytes given]
-  (if (= 32 (count good) (count given)) 
+  (if (= 32 (count good) (count given))
     (zero? (reduce bit-or (map bit-xor good given)))
     false))
 
@@ -84,7 +82,7 @@
         tkt-bytes (decode tkt)
         data-bytes (slice tkt-bytes 32 (count tkt-bytes))]
        (if (signature-valid? (signature key-bytes data-bytes) (slice tkt-bytes 0 32))
-         (String. (decrypt key-bytes 
+         (String. (decrypt key-bytes
                            (slice data-bytes 0 16)
                            (slice data-bytes 16 (count data-bytes)))))))
 
@@ -94,8 +92,8 @@
 (def expiration-format (time-format/formatter "yyyyMMddHHmm"))
 
 (defn issue [key val expires-at]
-  (pack (decode key) 
-        (random-bytes 16) 
+  (pack (decode key)
+        (random-bytes 16)
         (str val (time-format/unparse expiration-format expires-at))))
 
 
@@ -110,11 +108,11 @@
 
 
 (defn get-id
-  "Returns a parsed integer of cookie value if possible, nil otherwise."
+  "Returns a parsed Long of cookie value if possible, nil otherwise."
   [^String key ^String tkt]
   (let [txt (get-text key tkt)]
     (if txt
-      (try (Integer. txt) (catch Exception e nil)))))
+      (try (Long. txt) (catch Exception e nil)))))
 
 
 (defn generate-key []
