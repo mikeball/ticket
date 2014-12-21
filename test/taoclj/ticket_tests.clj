@@ -1,94 +1,45 @@
 (ns taoclj.ticket-tests
   (:use clojure.test
         taoclj.ticket)
-  (:require [clj-time.core :as time]
-            [clj-time.format :as time-format]))
+  (:import [java.time Instant]))
 
 
-(deftest byte-are-encoded
-  (is (= (encode (.getBytes "test")) "dGVzdA==")))
-
-(deftest strings-are-decoded
-  (is (= (String. (decode "dGVzdA==")) "test")))
+(def secret-key "f7e8fb6cd89cb9b8a1861d11fd8c3ed3")
 
 
-
-(def clear-text "test")
-(def key "FR7u7rt7YI60oSUnD8N+uA==")
-(def iv "h6AQnkjm3PXYHqLIZLX2bg==")
-
-
-(deftest clear-text-is-encrypted-with-iv-prepended
-  (is (= "h6AQnkjm3PXYHqLIZLX2buOE7WLVajLDhoc/yebiRWU="
-         (encode (encrypt (decode key) (decode iv) clear-text)))))
-
-(deftest data-is-decrypted
-  (is (= clear-text (String. (decrypt (decode key)
-                                      (decode iv)
-                                      (decode "44TtYtVqMsOGhz/J5uJFZQ=="))))))
-
-(deftest signature-is-generated
-  (let [sig (signature (decode key) (decode "h6AQnkjm3PXYHqLIZLX2buOE7WLVajLDhoc/yebiRWU="))]
-    (is (= 32 (count sig)))
-    (is (= "/3AD23f5ynhfT+f69scmAbTDCDzblXNGn2z0B4oS5hA=" (encode sig)))))
-
-(deftest signatures-of-different-lengths-dont-pass-and-handle-nils
-  (are [good given] (false? (signature-valid? good given))
-       (.getBytes "aaa") (.getBytes "aa")
-       nil (.getBytes "aaa")
-       (.getBytes "aaa") nil))
+(deftest tickets-are-round-tripped
+  (are [v] (= v
+              (let [read (make-reader secret-key)]
+                (read (issue v (Instant/MAX) secret-key)
+                      (Instant/now)) ))
+       1234
+       "test"))
 
 
 
-(deftest invalid-signatures-are-detected
-  (let [good-sig (decode "XuzimwPIEW3DPyppoUxF/CwiT2zA0V/iz+qgnRNpIKI=")
-        bad-sig (decode "oFXsHiUslECsPavGx0BEmR9Ge54Zh/ktH9tTuoXUmCQ=")]
-    (are [good given expected] (= expected (signature-valid? good given))
-         good-sig (.getBytes "abc") false
-         good-sig bad-sig false
-         good-sig good-sig true
-         good-sig nil false
-         good-sig (.getBytes "a") false)))
+(deftest tickets-expire
+  (is (nil?  (let [read (make-reader secret-key)
+                   at   (Instant/now)]
+               (read (issue "test" at secret-key)
+                     at )))))
 
 
-(def good-ticket "/3AD23f5ynhfT+f69scmAbTDCDzblXNGn2z0B4oS5hCHoBCeSObc9dgeoshktfZu44TtYtVqMsOGhz/J5uJFZQ==")
-
-(deftest ticket-is-packed
-  (is (= good-ticket (pack (decode key) (decode iv) clear-text))))
-
-
-(deftest tickets-signatures-are-verified-when-unpacked
-  (let [bad-ticket "/3AA23f5ynhfT+f69scmAbTDCDzblXNGn2z0B4oS5hCHoBCeSObc9dgeoshktfZu44TtYtVqMsOGhz/J5uJFZQ=="]
-    (is (nil? (unpack key bad-ticket)))
-    (is (not (nil? (unpack key good-ticket))))))
-
-(deftest ticket-contents-are-unpacked
-  (is (= clear-text (unpack key good-ticket))))
+(deftest bad-keys-are-ignored
+  (is (nil?  (let [read (make-reader secret-key)]
+               (read (issue "test" (Instant/MAX) "ffe8fb6cd89cb9b8a1861d11fd8c3ed3")
+                     (Instant/now))))))
 
 
 
-(deftest text-is-returned-on-still-valid-issued-tickets
-  (let [now (time/now)
-        tkt (issue key clear-text (time/plus now (time/minutes 2)))]
-    (is (= clear-text (get-text key tkt)))))
-
-(deftest get-text-returns-expected-values
-  (are [minutes-offset expected] (let [now (time/now)
-                                       expires-at  (time/plus now (time/minutes minutes-offset))
-                                       tkt (issue key clear-text expires-at)]
-                                   (is (= expected (get-text key tkt))))
-       1 clear-text
-       0 nil))
-
-(deftest get-id-returns-expected-values
-  (are [issued minutes-offset expected] (let [now (time/now)
-                                       expires-at  (time/plus now (time/minutes minutes-offset))
-                                       tkt (issue key issued expires-at)]
-                                   (is (= expected (get-id key tkt))))
-       "111" 1 111
-       "17592186045420" 1 17592186045420
-       "111" 0 nil))
 
 
-(deftest keys-are-generated
-  (is (= 24 (count (generate-key)))))
+
+
+
+
+
+
+
+
+
+
