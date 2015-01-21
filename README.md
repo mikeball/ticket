@@ -26,17 +26,17 @@ Add the following dependency to your `project.clj` file:
 
 
 ;; issue a ticket valid for 2 minutes with value of "123".
-(def my-ticket (ticket/issue my-key 
-                             "123" 
+(def my-ticket (ticket/issue my-key
+                             "123"
                              (time/plus (time/now) (time/minutes 2))))
 => "your-encrypted-signed-and-encoded-ticket-string"
 
 
-;; Easily retrieve the string value from a ticket. 
+;; Easily retrieve the string value from a ticket.
 (ticket/get-text my-key my-ticket)
 => "123"
 
-;; If the ticket value is an integer, easily retrieve the numeric value. 
+;; If the ticket value is an integer, easily retrieve the numeric value.
 (ticket/get-id my-key my-ticket)
 => 123
 

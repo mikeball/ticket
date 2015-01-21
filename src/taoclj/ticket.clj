@@ -10,7 +10,8 @@
 ; Ticket Structure
 ; [hmac-sha1-bytes][iv-bytes][encrypted-aes128-bytes [expiration-instant-bytes][type-byte][payload-bytes]]
 
-
+; should key generation be part of ticket library?
+; Where should key generation be? taoclj.tao.crypto?
 (defn gen-key
   "Generates a random key of given size in bytes, returns hex encoded string."
   [size]
@@ -29,6 +30,9 @@
 
   returns the ticket as a string."
   [payload expiry secret-key]
+
+  ; perhaps validate the secret-key length, expiry, payload...
+
   (let [secret-key-bytes (decode-hex secret-key)]
     (-> (package payload)
         (timestamp-payload expiry)
@@ -43,7 +47,9 @@
 
 
 ; could we cache or memoize the result somehow?
-(defn make-reader [^String secret-key]
+; perhaps we should pass in the secret-key as a byte array, handle decoding outside of this lib?
+; if we do this, we can collapse this into a single function, which seems simpler
+(defn make-reader [^String secret-key] 
   (let [secret-key-bytes (decode-hex secret-key)]
     (fn [^String ticket ^Instant as-of]
       (some-> (decode-hex ticket)
