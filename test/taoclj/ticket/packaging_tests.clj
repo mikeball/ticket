@@ -7,6 +7,9 @@
 (deftest packaged-values-are-round-tripped
   (are [v] (= v (unpack (package v)))
        1234
-       "test"))
+       "test"
+       (java.lang.Integer. 3456)
+
+       ))
 
 

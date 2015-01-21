@@ -23,6 +23,10 @@
           (byte-array (cons string-identifier
                       (.getBytes payload string-encoding)))
 
+          (= cls java.lang.Integer)
+          (byte-array (cons long-identifier
+                            (long-to-bytes (.longValue payload))))
+
           :default
           (throw (Exception. "Payload type not supported!"))  )))
 
