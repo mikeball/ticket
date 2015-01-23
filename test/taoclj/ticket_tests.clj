@@ -13,7 +13,8 @@
                 (read (issue v (Instant/MAX) secret-key)
                       (Instant/now)) ))
        1234
-       "test"))
+       "test"
+       ))
 
 
 
@@ -29,6 +30,10 @@
                (read (issue "test" (Instant/MAX) "ffe8fb6cd89cb9b8a1861d11fd8c3ed3")
                      (Instant/now))))))
 
+
+(deftest nil-cookies-are-handled
+  (is (nil? (let [read (make-reader secret-key)]
+              (read nil (Instant/now))))))
 
 
 

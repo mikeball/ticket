@@ -49,14 +49,15 @@
 ; could we cache or memoize the result somehow?
 ; perhaps we should pass in the secret-key as a byte array, handle decoding outside of this lib?
 ; if we do this, we can collapse this into a single function, which seems simpler
-(defn make-reader [^String secret-key] 
+(defn make-reader [^String secret-key]
   (let [secret-key-bytes (decode-hex secret-key)]
     (fn [^String ticket ^Instant as-of]
-      (some-> (decode-hex ticket)
-              (unpack-signed-payload secret-key-bytes)
-              (decrypt-payload secret-key-bytes)
-              (unpack-timestamped-payload as-of)
-              (unpack) ))))
+      (if ticket
+        (some-> (decode-hex ticket)
+                (unpack-signed-payload secret-key-bytes)
+                (decrypt-payload secret-key-bytes)
+                (unpack-timestamped-payload as-of)
+                (unpack))))))
 
 
 
