@@ -14,58 +14,57 @@ An encrypted ticketing library, primarily intended for use in cookie based authe
    [payload-bytes]]]
 ```
 
-- Ticket byte array is then Hex encoded as a string
+- Ticket byte array is Hex encoded as a string
 - HMAC signature is checked in constant time
-- IV is generated as a hash of the secret key for ease of use
-- AES 128 is deemed strong enough for short term ticket encryption
+- IV is generated as a hash of the secret key
+- AES 128 is deemed strong enough for short term encryption
 
 
 ## Installation
-
-Add the following dependency to your `project.clj` file:
-
 ```clojure
 [org.taoclj/ticket "0.2.0"]
 ```
 
 
 
-## Usage
-
+## Preliminary Setup
 ```clojure
 (require '[taoclj.ticket :as ticket])
-(require '[clj-time.core :as time])
+(require '[taoclj.time :as time])
 
 ;; generate a key
-(def my-key (ticket/generate-key))
+(def secret-key (ticket/generate-key))
 => "your-randomly-generated-128bit-key-string"
-
-
 ```
 
-### Issue Tickets
+### How to Issue Tickets
 ```clojure
-;; issue a ticket valid for 2 minutes with value of "123".
-(def my-ticket (ticket/issue my-key
-                             "123"
-                             (time/plus (time/now) (time/minutes 2))))
-=> "your-encrypted-signed-and-encoded-ticket-string"
+;; issue a ticket valid for 2 hours with value of "abc".
 
+(ticket/issue "abc"
+              (time/now-plus 2 :hours)
+              secret-key)
 
-;; Easily retrieve the string value from a ticket.
-(ticket/get-text my-key my-ticket)
-=> "123"
+=> "encrypted-signed-and-encoded-ticket-string"
+```
 
-;; If the ticket value is an integer, easily retrieve the numeric value.
-(ticket/get-id my-key my-ticket)
-=> 123
+### How to Read Tickets
+```clojure
 
+;; create a ticker reader
+(def read-ticket (ticket/make-reader conf/cookie-key))
 
-;; After expiration of ticket, or if the ticket has been tampered with...
-(ticket/get-text my-key my-ticket)
-=> nil
+;; read the value out
+(read-ticket "encrypted-signed-and-encoded-ticket-string"
+             (time/now))
+
+=> returns the value stored if ticket is valid
+=> returns nil otherwise
 
 ```
+
+
+
 
 
 ### How to Issue Ring Cookies
