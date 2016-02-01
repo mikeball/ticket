@@ -2,7 +2,22 @@
 
 An encrypted ticketing library, primarily intended for use in cookie based authentication.
 
-Each ticket is encrypted with AES 128 bit encryption & initialization vector, then signed with SHA256 HMAC. Expiration is packaged inside of the ticket and is checked when value is retrieved.
+
+## Ticket Structure
+
+```clojure
+[[hmac-sha1-bytes]
+ [iv-bytes]
+ [encrypted-aes128-bytes
+   [expiration-instant-bytes]
+   [type-byte]
+   [payload-bytes]]]
+```
+
+- Ticket byte array is then Hex encoded as a string
+- HMAC signature is checked in constant time
+- IV is generated as a hash of the secret key for ease of use
+- AES 128 is deemed strong enough for short term ticket encryption
 
 
 ## Installation
@@ -10,8 +25,9 @@ Each ticket is encrypted with AES 128 bit encryption & initialization vector, th
 Add the following dependency to your `project.clj` file:
 
 ```clojure
-[org.taoclj/ticket "0.0.1"]
+[org.taoclj/ticket "0.2.0"]
 ```
+
 
 
 ## Usage
@@ -25,6 +41,10 @@ Add the following dependency to your `project.clj` file:
 => "your-randomly-generated-128bit-key-string"
 
 
+```
+
+### Issue Tickets
+```clojure
 ;; issue a ticket valid for 2 minutes with value of "123".
 (def my-ticket (ticket/issue my-key
                              "123"
@@ -48,9 +68,30 @@ Add the following dependency to your `project.clj` file:
 ```
 
 
+### How to Issue Ring Cookies
+
+```clojure
+(ticket/issue-cookie
+   {
+    ;; from generated key above..
+    :secret-key    "your-randomly-generated-128bit-key-string"
+    :cookie-name   "my-cookie-name"
+
+    ;; :value can be integer or string
+    :value         123
+
+    ;; A java.time.Instant after which the ticket should expire
+    :expires       (time/now-plus 7 :days)
+
+    :http-only     true
+    :secure        false
+
+    })
+```
+
 
 ## License
 
-Copyright © 2012 Michael Ball
+Copyright © 2016 Michael Ball
 
 Distributed under the Eclipse Public License, the same as Clojure.
