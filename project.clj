@@ -1,4 +1,4 @@
-(defproject org.taoclj/ticket "0.1.0-beta1"
+(defproject org.taoclj/ticket "0.2.0"
   :description "An encrypted ticketing library."
 
   :url "http://github.com/mikeball/ticket"
