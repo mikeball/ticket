@@ -4,11 +4,12 @@
             [taoclj.ticket.expiration :refer [timestamp-payload unpack-timestamped-payload]]
             [taoclj.ticket.crypto     :refer [random-bytes encrypt-payload decrypt-payload]]
             [taoclj.ticket.signing    :refer [sign-payload unpack-signed-payload]])
-  (:import [java.time Instant]) )
+  (:import [java.time Instant ZoneId]
+           ; [java.time.temporal ChronoUnit]
+           [java.time.format DateTimeFormatter]))
 
 
-; Ticket Structure
-; [hmac-sha1-bytes][iv-bytes][encrypted-aes128-bytes [expiration-instant-bytes][type-byte][payload-bytes]]
+
 
 ; should key generation be part of ticket library?
 ; Where should key generation be? taoclj.tao.crypto?
@@ -41,8 +42,8 @@
         (encode-hex) )))
 
 
-(issue 1234 (java.time.Instant/MAX) "6e3c528eb078df50b11e1a78067456a8"
-        )
+; (issue 1234 (java.time.Instant/MAX) "6e3c528eb078df50b11e1a78067456a8"
+;        )
 
 
 
@@ -60,10 +61,56 @@
                 (unpack))))))
 
 
+(comment
+  (let [read (make-reader "6e3c528eb078df50b11e1a78067456a8")]
+    (read "cbf12593e27870902dacecd4aa7b98d070a2e6c886e26d6b80a9adddc3a7a9e17c6db6374c9e63065001190a42e0ab80436d77753196aa3c92fa4d073b40973a58baf3c2"
+          (Instant/now)) ))
 
-(let [read (make-reader "6e3c528eb078df50b11e1a78067456a8")]
-  (read "cbf12593e27870902dacecd4aa7b98d070a2e6c886e26d6b80a9adddc3a7a9e17c6db6374c9e63065001190a42e0ab80436d77753196aa3c92fa4d073b40973a58baf3c2"
-        (Instant/now)) )
 
 
 
+
+(defn issue-cookie [settings]
+
+  (let [cookie-name (:cookie-name settings)]
+
+    (if-not (string? cookie-name) ;; todo check for empty string
+      (throw (Exception. ":cookie-name key must be string specified in settings map!")))
+
+    {(:cookie-name settings)
+     {:http-only (:http-only settings)
+      :secure (:secure settings)
+
+      :expires
+      (if-let [expires (:expires settings)]
+        (-> expires
+            (.atZone (ZoneId/of "UTC"))
+            (.format (DateTimeFormatter/RFC_1123_DATE_TIME))))
+
+      :value
+      (issue (:value settings)
+             (:expires settings)
+             (:secret-key settings))
+
+      }}))
+
+
+
+(comment
+  (issue-cookie
+   {:secret-key    "key string"
+    :cookie-name   "id"
+    :cookie-value  123
+    :http-only     true ; default to true
+    :secure        false ; default to true
+    :expires       (-> (LocalDateTime/of 2016 1 30 14 11 12)
+                       (.toInstant (java.time.ZoneOffset/UTC)))
+    }))
+
+
+
+; expired cookie
+
+(defn expired-cookie [cookie-name]
+  {cookie-name {:value "expired"
+                :expires "Thu, 01 Jan 1970 00:00:00 UTC"}})
