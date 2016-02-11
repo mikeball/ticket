@@ -16,7 +16,7 @@ An encrypted ticketing library, primarily intended for use in cookie based authe
 
 - Ticket byte array is Hex encoded as a string
 - HMAC signature is checked in constant time
-- IV is generated as a hash of the secret key
+- HMAC signing key is generated as a SHA-1 hash of the secret key
 - AES 128 is deemed strong enough for short term encryption
 
 
