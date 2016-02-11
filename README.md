@@ -42,7 +42,11 @@ An encrypted ticketing library, primarily intended for use in cookie based authe
 ;; issue a ticket valid for 2 hours with value of "abc".
 
 (ticket/issue "abc"
+
               (time/now-plus 2 :hours)
+              ;; or using java.time directly...
+              ;; (.plus (java.time.Instant/now) (java.time.Duration/ofHours 2))
+
               secret-key)
 
 => "encrypted-signed-and-encoded-ticket-string"
