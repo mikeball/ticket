@@ -21,7 +21,7 @@
 
 
 (defn signature-valid?
-  "Checks validity/equality of HmacSHA256 signatures in constant time."
+  "Checks validity/equality of HmacSHA1 signature in constant time."
   [#^bytes given #^bytes good ]
   (if (= 20 (count good) (count given))
     (zero? (reduce bit-or (map bit-xor good given)))
